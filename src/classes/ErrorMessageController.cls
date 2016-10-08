@@ -52,36 +52,27 @@ public abstract class ErrorMessageController {
     }
 
     public String messageNotInput { get {
-        return String.format(errorFormat.requiredErrorFormat(), new String[]{ displayName });
+        return String.format(errorFormat().requiredErrorFormat(), new String[]{ displayName });
     }}
     public String messageBadPattern { get {
         String[] filter = new String[]{ displayName, resultBadPattern.getValidContent() };
-        return String.format(errorFormat.badPatternErrorFormat(), filter); 
+        return String.format(errorFormat().badPatternErrorFormat(), filter); 
     }}
     public String messageTooLong { get {
         String[] filter = new String[]{ displayName, resultTooLong.getValidContent() };
-        return String.format(errorFormat.tooLongErrorFormat(), filter); 
+        return String.format(errorFormat().tooLongErrorFormat(), filter); 
     }}
     public String messageBigValue { get {
         String[] filter = new String[]{ displayName, resultBigValue.getValidContent() };
-        return String.format(errorFormat.bigErrorFormat(), filter); 
+        return String.format(errorFormat().bigErrorFormat(), filter); 
     }}
     public String messageSmallValue { get {
         String[] filter = new String[]{ displayName, resultSmallValue.getValidContent() };
-        return String.format(errorFormat.smallErrorFormat(), filter); 
+        return String.format(errorFormat().smallErrorFormat(), filter); 
     }}
     
-    private ValidationErrorFormat errorFormat {
-        get {
-            if (errorFormat == null) {
-                Type t = Type.forName(System.Label.VALIDATION_ERROR_FORMAT);
-                errorFormat = (ValidationErrorFormat) t.newInstance();
-            }
-            return errorFormat;
-        }
-        private set;
-    }
-        
+    protected abstract ValidationErrorFormat errorFormat();
+
     // ---------------------- private ----------------------------
     private InputResult getResult(InputResult.Type type) {
         if (results != null) {
