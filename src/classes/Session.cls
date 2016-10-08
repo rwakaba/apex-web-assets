@@ -22,7 +22,9 @@ public virtual class Session {
     }
 
     /**
-     * While Communities isn’t enabled for the user’s organization or the user is currently in the internal organization, for development, you want the contact id as entry point of session user, extends this method.
+     * Return the fake contact id.
+     * While Communities isn’t enabled for the user’s organization or the user is currently in the internal organization, 
+     * for development, you want the contact id as entry point of session user, override this method.
      */
     public virtual Id fakeContactId() { return null; }
 
