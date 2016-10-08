@@ -74,7 +74,7 @@ public abstract class ErrorMessageController {
     private ValidationErrorFormat errorFormat {
         get {
             if (errorFormat == null) {
-                Type t = Type.forName('ValidationErrorFormat');
+                Type t = Type.forName(System.Label.VALIDATION_ERROR_FORMAT);
                 errorFormat = (ValidationErrorFormat) t.newInstance();
             }
             return errorFormat;
