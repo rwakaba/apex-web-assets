@@ -1,53 +1,55 @@
-# uml
-## view diagram
-http://www.plantuml.com/plantuml/uml/SyfFKj2rKt3CoKnELR1Io4ZDoSa70000
+# Apex Web Assets
+## Features
+### Action
+ActionHandler is for Template Method Pattern.
 
-## class diagram
-@startuml
-package "common components" #DDDDDD {
-  class ActionHandler
-  class GetParameter
-  class Session
-  class ParameterCheck
-  class ParameterCheckRule
-  class ParameterCheckRule.RuleImplementation
-  class Validation
-  class ValidationResults
-  class InputResult
-  class DefaultValidator
-  class ErrorMessageController
-}
+before
 
-package "app base components" #EEEEEE {
-  class AppActionHandler
-  class AppSession
-  class AppErrorMessageController
-  class ValidationMessage <<Components>>
-}
+    public class GetHandler extends ActionHandler {
+        public override void before() {
+            setRule('id').caseNull(NotFound).caseIsNotSalesforceId(NotFound).check();
+        }
+    }
 
-package "Function Foo" #FFFFFF {
-  class FooPage <<Page>>
-  class FooController
-  class FooAction
-}
+handle exception
 
-ActionHandler <|-up- AppActionHandler
-Session <|-up- AppSession
-AppActionHandler <|-up- FooAction
+    public override PageReference handleException(Exception e) {
+        //throw e;
+        PageReference p= Page.DebugPage;
+        p.setRedirect(true);
+        p.getParameters().put('message', e.getMessage());
+        p.getParameters().put('typeName', e.getTypeName());
+        p.getParameters().put('stacktrace', e.getStackTraceString());
+        return p;
+    }
 
-ParameterCheck *-- ParameterCheckRule
-ParameterCheckRule *-- ParameterCheckRule.RuleImplementation
-AppActionHandler o-- GetParameter
-AppActionHandler o-- AppSession
-AppActionHandler --> ParameterCheck
-Validation --> InputResult
-ValidationResults --> InputResult
-DefaultValidator --> Validation
-DefaultValidator o-- ValidationResults
-ErrorMessageController o-- ValidationResults
-ValidationMessage *-- ErrorMessageController
-FooPage *-- FooController
-FooController *-- FooAction
-FooAction --> DefaultValidator
-FooPage *-- ValidationMessage
-@enduml
+### Get Parameter Handling
+
+    ParameterCheck rule = new ParameterCheck(paramName);
+    rule('id').caseNull(NotFound).caseIsNotSalesforceId(NotFound).check();
+
+### Form Validation
+Controller
+- First.
+
+    // validation
+    DefaultValidator val = new DefaultValidator();
+
+- Required Check.
+
+    val.checkRequired('title', ctrl.todo.Name);
+
+- Length Check.
+
+    val.checkLength('title', 80);
+
+- Last.
+
+    if (val.results.hasError()) {
+        ctrl.vResult = val.results;
+        return null;
+    }
+
+Components
+For to show error messages, matching your application design, write your own message components.
+
