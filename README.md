@@ -1,55 +1,139 @@
-# Apex Web Assets
-## Features
-### Action
-ActionHandler is for Template Method Pattern.
+# apex web assets
+## features
+### get parameter handling
 
-before
+    parametercheck check = new parametercheck('id');
+    check.casenull(notfound)
+         .caseisnotsalesforceid(notfound)
+         .check();
 
-    public class GetHandler extends ActionHandler {
-        public override void before() {
-            setRule('id').caseNull(NotFound).caseIsNotSalesforceId(NotFound).check();
+### action
+actionhandler is for template method pattern.
+
+#### extends
+
+    public class gethandler extends actionhandler {
+    }
+
+#### before
+write exception case in before method.
+
+    public override void before() {
+        parametercheck check = new parametercheck('id');
+        check.casenull(notfound)
+             .caseisnotsalesforceid(notfound)
+             .check();
+    }
+
+then, main logic in action can be focused on the normal case.
+
+    id accountid = getparameter.getinstance().salesforceid('id');
+    account a = [select name from account where id = :accountid];
+
+#### handle exception
+
+    public override pagereference handleexception(exception e) {
+        error__c log = new error__c();
+        log.message__c = e.getmessage();
+        log.typtname__c = e.gettypename();
+        log.stacktracestring__c = e.getstacktracestring();
+        insert log;
+
+        if (debug) {
+            pagereference p= page.debugpage;
+            p.setredirect(true);
+            p.getparameters().put('message', e.getmessage());
+            p.getparameters().put('typename', e.gettypename());
+            p.getparameters().put('stacktrace', e.getstacktracestring());
+            return p;
+        } else {
+          throw e;
         }
     }
 
-handle exception
+### form validation
+#### controller
 
-    public override PageReference handleException(Exception e) {
-        //throw e;
-        PageReference p= Page.DebugPage;
-        p.setRedirect(true);
-        p.getParameters().put('message', e.getMessage());
-        p.getParameters().put('typeName', e.getTypeName());
-        p.getParameters().put('stacktrace', e.getStackTraceString());
-        return p;
-    }
-
-### Get Parameter Handling
-
-    ParameterCheck rule = new ParameterCheck(paramName);
-    rule('id').caseNull(NotFound).caseIsNotSalesforceId(NotFound).check();
-
-### Form Validation
-Controller
-- First.
+instantiation
 
     // validation
-    DefaultValidator val = new DefaultValidator();
+    defaultvalidator val = new defaultvalidator();
 
-- Required Check.
+required check.
 
-    val.checkRequired('title', ctrl.todo.Name);
+    val.checkrequired('title', ctrl.title);
 
-- Length Check.
+length check.
 
-    val.checkLength('title', 80);
+    val.checkrequired('title', ctrl.title);
+    val.checklength('title', 80);
 
-- Last.
+check the result.
 
-    if (val.results.hasError()) {
-        ctrl.vResult = val.results;
+    if (val.results.haserror()) {
+        ctrl.vresult = val.results;
         return null;
     }
 
-Components
-For to show error messages, matching your application design, write your own message components.
+#### components
+for to show error messages, matching your application design, write your own message components.
+
+1. Implements the ValidationErrorFormat
+
+    public class AppValidationErrorFormat implements ValidationErrorFormat {
+
+        public String requiredErrorFormat() {
+            return 'field {0} is required';
+        }
+
+        public String badPatternErrorFormat() {
+            return 'field {0} is bad pattern. Input by {1}';
+        }
+
+        public String tooLongErrorFormat() {
+            return 'field {0} is bad pattern. Input by {1}';
+        }
+
+        public String bigErrorFormat() {
+            return 'field {0} is bad pattern. Input by {1}';
+        }
+
+        public String smallErrorFormat() {
+            return 'field {0} is bad pattern. Input by {1}';
+        }
+    }
+
+2. Extends the ErrorMessageController
+
+    public class AppErrorMessageController extends ErrorMessageController {
+        protected override ValidationErrorFormat errorFormat() {
+            return new AppValidationErrorFormat();
+        }
+    }
+
+3. Write the Components.
+
+    <apex:component controller="errormessagecontroller" layout="none">
+
+        <apex:attribute name="validationresults" type="validationresults" required="true" description="" assignto="{!results}"/>
+
+        <apex:attribute name="name" type="string" required="true" description="" assignto="{!key}"/>
+
+        <apex:attribute name="label" type="string" required="true" description="" assignto="{!displayname}"/>
+
+        <!-- Required -->
+        <apex:outputpanel rendered="{!shownotinputerror}" layout="none">
+        <p class="error-msg"><i class="icon icon-error"></i>{!messagenotinput}</p>
+        </apex:outputpanel>
+
+        <!-- Pattern -->
+        <apex:outputpanel rendered="{!showbadpatternerror}" layout="none">
+        <p class="error-msg"><i class="icon icon-error"></i>{!messagebadpattern}</p>
+        </apex:outputpanel>
+
+        <!-- Length -->
+        <apex:outputpanel rendered="{!showtoolongerror}" layout="none">
+        <p class="error-msg"><i class="icon icon-error"></i>{!messagetoolong}</p>
+        </apex:outputpanel>
+    </apex:component>
 
