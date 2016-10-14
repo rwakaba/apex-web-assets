@@ -112,7 +112,7 @@ for to show error messages, matching your application design, write your own mes
 
 3. Write the Components.
 
-        <apex:component controller="errormessagecontroller" layout="none">
+        <apex:component controller="AppErrorMessageController" layout="none">
 
             <apex:attribute name="validationresults" type="validationresults" required="true" description="" assignto="{!results}"/>
 
